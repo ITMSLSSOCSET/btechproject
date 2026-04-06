@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>ITM SLS · Internal Guide wise Student List</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #fff5f5;
+            min-height: 100vh;
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 20px 40px -12px rgba(139, 0, 0, 0.15);
+            border: 1px solid #ffcccc;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(145deg, #8b0000, #cc0000);
+            color: white;
+            padding: 24px 32px 20px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .university-info {
+            line-height: 1.2;
+        }
+
+        .university-name {
+            font-size: 1.35rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .university-name::before {
+            content: "🏛️";
+            font-size: 1.4rem;
+        }
+
+        .department-name {
+            font-size: 0.85rem;
+            font-weight: 400;
+            opacity: 0.9;
+            margin-top: 2px;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(8px);
+            padding: 8px 20px;
+            border-radius: 100px;
+            border: 0.5px solid rgba(255,255,255,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .stat-value {
+            font-size: 1.7rem;
+            font-weight: 700;
+            line-height: 1;
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+            opacity: 0.85;
+        }
+
+        .header h1 {
+            font-size: 1.9rem;
+            font-weight: 700;
+            margin: 10px 0 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+
+        .modal-btn {
+            background: white;
+            color: #8b0000;
+            border: none;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.18s;
+        }
+
+        .modal-btn:hover {
+            background: #ffe6e6;
+            transform: scale(0.98);
+        }
+
+        .search-section {
+            padding: 20px 28px;
+            background: #fffafa;
+            border-bottom: 1px solid #ffcccc;
+        }
+
+        .search-box {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .search-label {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #8b0000;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            background: white;
+            border-radius: 60px;
+            padding: 4px;
+            border: 1.5px solid #ffcccc;
+            transition: 0.15s;
+        }
+
+        .input-group:focus-within {
+            border-color: #cc0000;
+            box-shadow: 0 0 0 3px rgba(204, 0, 0, 0.08);
+        }
+
+        #guideName {
+            flex: 1;
+            padding: 12px 18px;
+            border: none;
+            border-radius: 60px;
+            font-size: 0.95rem;
+            background: transparent;
+            outline: none;
+        }
+
+        #searchBtn {
+            background: linear-gradient(145deg, #8b0000, #cc0000);
+            color: white;
+            border: none;
+            padding: 10px 28px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.18s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+        }
+
+        #searchBtn:hover {
+            background: #6b0000;
+            transform: scale(0.96);
+        }
+
+        .suggestions {
+            font-size: 0.75rem;
+            color: #b22222;
+            margin-top: 8px;
+            padding-left: 12px;
+        }
+
+        .results-section {
+            padding: 0;
+            background: white;
+        }
+
+        .empty-state, .no-results {
+            text-align: center;
+            padding: 50px 24px;
+            color: #8b0000;
+        }
+
+        .empty-icon {
+            font-size: 3.2rem;
+            opacity: 0.5;
+            margin-bottom: 12px;
+        }
+
+        .results-container {
+            display: none;
+        }
+
+        .guide-header {
+            background: linear-gradient(105deg, #fff5f5, #ffffff);
+            padding: 16px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ffcccc;
+        }
+
+        .guide-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #8b0000;
+        }
+
+        .guide-meta {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            background: #ffe6e6;
+            padding: 6px 18px;
+            border-radius: 60px;
+            color: #8b0000;
+            font-weight: 500;
+        }
+
+        .student-count {
+            background: #8b0000;
+            color: white;
+            padding: 3px 14px;
+            border-radius: 60px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .students-container {
+            padding: 12px 20px 24px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .student-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            border-radius: 16px;
+            box-shadow: 0 0 0 1px #ffcccc;
+        }
+
+        .student-table th {
+            background: #fff5f5;
+            padding: 12px 10px;
+            font-weight: 600;
+            color: #8b0000;
+            font-size: 0.7rem;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .student-table td {
+            padding: 10px 10px;
+            border-bottom: 1px solid #ffe6e6;
+        }
+
+        .student-table tbody tr:hover {
+            background: #fff5f5;
+        }
+
+        .team-badge {
+            background: #8b0000;
+            color: white;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: inline-block;
+            text-align: center;
+            min-width: 50px;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #ffe6e6;
+            border-top-color: #8b0000;
+            border-radius: 50%;
+            animation: spin 0.7s infinite;
+            margin: 0 auto 12px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #8b0000;
+        }
+
+        .error-message {
+            display: none;
+            padding: 30px;
+            text-align: center;
+            color: #721c24;
+            background: #f8d7da;
+            margin: 20px;
+            border-radius: 16px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(139, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            border-radius: 28px;
+            overflow: hidden;
+            animation: modalSlide 0.25s ease;
+        }
+
+        @keyframes modalSlide {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            background: linear-gradient(145deg, #8b0000, #cc0000);
+            color: white;
+            padding: 18px 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            font-weight: 600;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 32px;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            max-height: calc(80vh - 80px);
+        }
+
+        .guide-list-item {
+            background: #fff5f5;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid #ffcccc;
+        }
+
+        .guide-list-item:hover {
+            background: #ffe6e6;
+            border-color: #cc0000;
+            transform: translateX(4px);
+        }
+
+        .guide-list-name {
+            font-weight: 700;
+            color: #8b0000;
+            font-size: 0.95rem;
+        }
+
+        .guide-list-stats {
+            font-size: 0.75rem;
+            color: #b22222;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="header-top">
+            <div class="university-info">
+                <div class="university-name">ITM SLS Baroda University</div>
+                <div class="department-name">School of Computer Science Engineering & Technology</div>
+            </div>
+            <div class="stats-container">
+                <div class="stat-item" id="totalGuidesStat">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">GUIDES</div>
+                </div>
+                <div class="stat-item" id="totalStudentsStat">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">STUDENTS</div>
+                </div>
+                <div class="stat-item" id="totalTeamsStat">
+                    <div class="stat-value">0</div>
+                    <div class="stat-label">TEAMS</div>
+                </div>
+            </div>
+        </div>
+        <h1>📋 Student Directory by Internal Guide</h1>
+        <p>Search by guide name to view all students with their Team ID</p>
+        <button class="modal-btn" id="viewGuidesBtn">📖 Browse all guides</button>
+    </div>
+
+    <div class="modal" id="guidesModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>📖 All Internal Guides</h2>
+                <button class="close-modal" id="closeModal">✕</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <div id="guidesList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="search-section">
+        <div class="search-box">
+            <label class="search-label">🔎 Internal Guide Name</label>
+            <div class="input-group">
+                <input type="text" id="guideName" placeholder="e.g., Prof. Anupam Mund, Dr. Pradeep Laxkar" autocomplete="off">
+                <button id="searchBtn">🔍 Search</button>
+            </div>
+            <div class="suggestions" id="suggestions">⚡ Loading available guides...</div>
+        </div>
+    </div>
+
+    <div class="loading" id="globalLoading"><div class="loading-spinner"></div><p>Loading data from btech.json...</p></div>
+    <div class="error-message" id="errorMessage"></div>
+
+    <div class="results-section">
+        <div class="empty-state" id="emptyState">
+            <div class="empty-icon">🔍✨</div>
+            <h3>Find Internal Guide</h3>
+            <p>Enter guide name above to see all students with their Team ID</p>
+        </div>
+        <div class="no-results" id="noResults" style="display:none;">
+            <div class="empty-icon">🧑‍🏫</div>
+            <h3>No matching guide found</h3>
+            <p>Please check the spelling or try another name</p>
+        </div>
+
+        <div class="results-container" id="resultsContainer">
+            <div class="guide-header">
+                <div>
+                    <h2 class="guide-name" id="guideNameDisplay"></h2>
+                </div>
+                <div class="guide-meta">
+                    <span>👥 Total Students</span>
+                    <span class="student-count" id="studentCount">0</span>
+                </div>
+            </div>
+            
+            <div class="students-container" id="studentsContainer">
+                <table class="student-table" id="studentTable">
+                    <thead>
+                        <tr>
+                            <th>Team ID</th>
+                            <th>Student Name</th>
+                            <th>Enrollment</th>
+                            <th>Project Title</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+    (function() {
+        let btechData = [];
+        let allGuides = [];
+        let guideStats = {};
+        let totalStudents = 0;
+        let totalTeams = 0;
+
+        async function loadAllData() {
+            const loadingEl = document.getElementById('globalLoading');
+            const errorEl = document.getElementById('errorMessage');
+            
+            try {
+                loadingEl.style.display = 'block';
+                errorEl.style.display = 'none';
+                
+                document.getElementById('emptyState').style.display = 'block';
+                document.getElementById('resultsContainer').style.display = 'none';
+                document.getElementById('noResults').style.display = 'none';
+
+                const resp = await fetch('btech.json');
+                if (!resp.ok) throw new Error(`HTTP ${resp.status} - File not found`);
+                const data = await resp.json();
+                btechData = data;
+
+                processGuideData(btechData);
+                setupSearchSuggestions();
+                updateHeaderStats();
+
+                loadingEl.style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.innerHTML = `❌ Error loading btech.json: ${error.message}<br><br>Please ensure the file exists in the same directory.`;
+            }
+        }
+
+        function processGuideData(data) {
+            guideStats = {};
+            totalStudents = 0;
+            totalTeams = 0;
+            
+            if (!data || !Array.isArray(data)) {
+                console.error('Invalid data format - expected array');
+                return;
+            }
+            
+            for (let i = 0; i < data.length; i++) {
+                const group = data[i];
+                if (group && group["Internal Guide"]) {
+                    const guideName = group["Internal Guide"].trim();
+                    const teamId = group["Group ID"] || '—';
+                    
+                    if (!guideStats[guideName]) {
+                        guideStats[guideName] = { 
+                            teams: new Set(),
+                            students: []
+                        };
+                    }
+                    
+                    guideStats[guideName].teams.add(teamId);
+                    
+                    if (group.Members && Array.isArray(group.Members)) {
+                        for (let j = 0; j < group.Members.length; j++) {
+                            const member = group.Members[j];
+                            if (member && member.Name) {
+                                guideStats[guideName].students.push({
+                                    team_id: teamId,
+                                    name: member.Name || '—',
+                                    enrollment: member.Enrollment || '—',
+                                    project_title: group.Project_Title || '—'
+                                });
+                            }
+                        }
+                    }
+                }
+            }
+            
+            allGuides = Object.keys(guideStats).sort();
+            
+            for (let i = 0; i < allGuides.length; i++) {
+                const guide = allGuides[i];
+                const stats = guideStats[guide];
+                stats.totalStudents = stats.students.length;
+                stats.totalTeams = stats.teams.size;
+                totalStudents += stats.totalStudents;
+                totalTeams += stats.totalTeams;
+                
+                stats.students.sort(function(a, b) {
+                    return String(a.team_id).localeCompare(String(b.team_id), undefined, {numeric: true});
+                });
+            }
+            
+            const suggestionsEl = document.getElementById('suggestions');
+            if (allGuides.length > 0) {
+                const sampleGuides = allGuides.slice(0, 4);
+                suggestionsEl.innerHTML = '💡 Examples: ' + sampleGuides.join(' · ') + (allGuides.length > 4 ? ' · and more' : '');
+            } else {
+                suggestionsEl.innerHTML = '⚡ No guides found in btech.json';
+            }
+        }
+
+        function updateHeaderStats() {
+            document.querySelector('#totalGuidesStat .stat-value').textContent = allGuides.length;
+            document.querySelector('#totalStudentsStat .stat-value').textContent = totalStudents;
+            document.querySelector('#totalTeamsStat .stat-value').textContent = totalTeams;
+        }
+
+        function setupSearchSuggestions() {
+            const input = document.getElementById('guideName');
+            const datalist = document.createElement('datalist');
+            datalist.id = 'guideSuggestions';
+            for (let i = 0; i < allGuides.length; i++) {
+                const opt = document.createElement('option');
+                opt.value = allGuides[i];
+                datalist.appendChild(opt);
+            }
+            document.body.appendChild(datalist);
+            input.setAttribute('list', 'guideSuggestions');
+        }
+
+        function showGuidesModal() {
+            const modal = document.getElementById('guidesModal');
+            const guidesList = document.getElementById('guidesList');
+            
+            guidesList.innerHTML = '';
+            
+            for (let i = 0; i < allGuides.length; i++) {
+                const guideName = allGuides[i];
+                const stats = guideStats[guideName];
+                if (!stats) continue;
+                
+                const guideItem = document.createElement('div');
+                guideItem.className = 'guide-list-item';
+                guideItem.innerHTML = `
+                    <div class="guide-list-name">${escapeHtml(guideName)}</div>
+                    <div class="guide-list-stats">
+                        👥 ${stats.totalStudents} students · 👨‍👩‍👧‍👦 ${stats.totalTeams} teams
+                    </div>
+                `;
+                guideItem.addEventListener('click', (function(name) {
+                    return function() {
+                        document.getElementById('guideName').value = name;
+                        modal.style.display = 'none';
+                        searchGuide();
+                    };
+                })(guideName));
+                guidesList.appendChild(guideItem);
+            }
+            
+            modal.style.display = 'flex';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        function searchGuide() {
+            const searchTerm = document.getElementById('guideName').value.trim();
+            
+            const emptyState = document.getElementById('emptyState');
+            const noResults = document.getElementById('noResults');
+            const resultsContainer = document.getElementById('resultsContainer');
+
+            if (!searchTerm) {
+                emptyState.style.display = 'block';
+                noResults.style.display = 'none';
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            let foundGuide = null;
+            for (let i = 0; i < allGuides.length; i++) {
+                if (allGuides[i].toLowerCase() === searchTerm.toLowerCase()) {
+                    foundGuide = allGuides[i];
+                    break;
+                }
+            }
+            
+            if (!foundGuide || !guideStats[foundGuide]) {
+                emptyState.style.display = 'none';
+                noResults.style.display = 'block';
+                resultsContainer.style.display = 'none';
+                return;
+            }
+            
+            displayGuideDetails(foundGuide, guideStats[foundGuide]);
+            
+            emptyState.style.display = 'none';
+            noResults.style.display = 'none';
+            resultsContainer.style.display = 'block';
+        }
+
+        function displayGuideDetails(guideName, stats) {
+            document.getElementById('guideNameDisplay').textContent = guideName;
+            document.getElementById('studentCount').textContent = stats.totalStudents;
+
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+            
+            if (!stats.students || stats.students.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">No students found</td></tr>';
+                return;
+            }
+            
+            for (let i = 0; i < stats.students.length; i++) {
+                const student = stats.students[i];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><span class="team-badge">${escapeHtml(student.team_id)}</span></td>
+                    <td><strong>${escapeHtml(student.name)}</strong></td>
+                    <td style="font-size:0.75rem;">${escapeHtml(student.enrollment)}</td>
+                    <td style="max-width:300px; overflow:hidden; text-overflow:ellipsis;" title="${escapeHtml(student.project_title)}">${escapeHtml(student.project_title)}</td>
+                `;
+                tbody.appendChild(row);
+            }
+        }
+
+        document.getElementById('searchBtn').addEventListener('click', searchGuide);
+        document.getElementById('guideName').addEventListener('keypress', function(e) { 
+            if(e.key === 'Enter') searchGuide(); 
+        });
+        document.getElementById('viewGuidesBtn').addEventListener('click', showGuidesModal);
+        
+        document.getElementById('closeModal').addEventListener('click', function() {
+            document.getElementById('guidesModal').style.display = 'none';
+        });
+        
+        window.addEventListener('click', function(e) {
+            if (e.target === document.getElementById('guidesModal')) {
+                document.getElementById('guidesModal').style.display = 'none';
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', loadAllData);
+    })();
+</script>
+
+</body>
+</html>

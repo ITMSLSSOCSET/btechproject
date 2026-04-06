@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>B.Tech Viva · Stall-wise Display</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #fff5f5;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            padding: 1rem;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        /* header - red theme */
+        .uni-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .uni-header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #8b0000;
+            letter-spacing: -0.3px;
+        }
+        .uni-header h2 {
+            font-size: 1.2rem;
+            color: #cc0000;
+            margin-top: 0.2rem;
+            font-weight: 500;
+        }
+        .dept {
+            font-size: 1rem;
+            color: #b22222;
+            margin-top: 0.2rem;
+            font-weight: 450;
+        }
+        .exam-badge {
+            background: #8b0000;
+            padding: 0.4rem 1.2rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+            display: inline-block;
+            margin-top: 0.6rem;
+        }
+
+        /* search row */
+        .search-row {
+            background: white;
+            border-radius: 60px;
+            padding: 0.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            border: 1px solid #ffcccc;
+            box-shadow: 0 2px 8px rgba(139,0,0,0.1);
+            margin-bottom: 1.2rem;
+        }
+        .input-icon {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding-left: 1rem;
+            color: #8b0000;
+        }
+        .input-icon i {
+            font-size: 1rem;
+            color: #b22222;
+        }
+        .input-icon input {
+            width: 100%;
+            border: none;
+            padding: 0.9rem 0.5rem 0.9rem 0;
+            font-size: 1rem;
+            background: transparent;
+            outline: none;
+        }
+        .search-btn {
+            background: #8b0000;
+            border: none;
+            border-radius: 60px;
+            padding: 0.7rem 1.2rem;
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            white-space: nowrap;
+            margin-right: 0.2rem;
+            box-shadow: 0 2px 4px rgba(139,0,0,0.3);
+            transition: background 0.2s;
+        }
+        .search-btn:hover {
+            background: #6b0000;
+        }
+        .search-btn:active {
+            background: #4a0000;
+        }
+
+        /* message area */
+        .message {
+            background: #ffe6e6;
+            border-radius: 50px;
+            padding: 0.8rem 1.2rem;
+            margin: 0.8rem 0 1rem;
+            font-size: 0.95rem;
+            color: #8b0000;
+            border-left: 4px solid #cc0000;
+            word-break: break-word;
+        }
+        .message.error {
+            background: #ffcccc;
+            color: #cc0000;
+            border-left-color: #ff0000;
+        }
+        .message.info {
+            background: #e6f4ea;
+            color: #2e6b3e;
+            border-left-color: #3b9e5c;
+        }
+
+        /* result card */
+        .result-card {
+            background: white;
+            border-radius: 28px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(139,0,0,0.1);
+            border: 1px solid #ffcccc;
+            width: 100%;
+            overflow-x: hidden;
+        }
+        .hidden {
+            display: none !important;
+        }
+
+        /* stall header - red gradient */
+        .stall-header {
+            background: linear-gradient(135deg, #8b0000 0%, #cc0000 100%);
+            border-radius: 20px;
+            padding: 1rem 1.2rem;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.7rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+        .stall-id-block {
+            background: rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .time-block {
+            background: rgba(255,255,255,0.2);
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .venue-block {
+            background: rgba(255,255,255,0.25);
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* project panel */
+        .project-panel {
+            background: #fff5f5;
+            border-radius: 20px;
+            padding: 1.2rem;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ffcccc;
+        }
+        .project-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #b22222;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+        .project-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #8b0000;
+            line-height: 1.4;
+            word-break: break-word;
+        }
+
+        /* internal guide & external examiner */
+        .info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: #fff5f5;
+            padding: 0.8rem 1rem;
+            border-radius: 16px;
+            margin-bottom: 1.2rem;
+            border: 1px solid #ffcccc;
+        }
+        .info-item {
+            flex: 1;
+            min-width: 180px;
+        }
+        .info-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #b22222;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-weight: 600;
+            color: #8b0000;
+            margin-top: 0.2rem;
+        }
+
+        /* members */
+        .members-head {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #8b0000;
+            margin-bottom: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .member-simple {
+            background: white;
+            border-radius: 16px;
+            padding: 0.7rem 1rem;
+            border: 1px solid #ffcccc;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            margin-bottom: 0.6rem;
+            transition: all 0.2s;
+        }
+        .member-simple:hover {
+            background: #fff5f5;
+            border-color: #cc0000;
+        }
+        .member-icon-small {
+            background: #8b0000;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.1rem;
+        }
+        .member-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #4a0000;
+        }
+        .member-enroll {
+            font-size: 0.75rem;
+            color: #b22222;
+            background: #ffe6e6;
+            padding: 0.2rem 0.7rem;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+
+        .footnote {
+            text-align: center;
+            color: #b22222;
+            font-size: 0.7rem;
+            margin-top: 1rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid #ffcccc;
+        }
+        hr {
+            display: none;
+        }
+        
+        /* stats bar */
+        .stats-bar {
+            background: #ffe6e6;
+            border-radius: 40px;
+            padding: 0.5rem 1rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #8b0000;
+            margin-top: 1rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+<div class="container">
+    <div class="uni-header">
+        <h1>🏛️ ITM SLS Baroda University</h1>
+        <h2>Faculty of Technology & Engineering</h2>
+        <div class="dept">School of Computer Science Engineering & Technology</div>
+        <div class="exam-badge"><i class="far fa-calendar-alt"></i> PROJECT VIVA · STALL-WISE PRESENTATION</div>
+    </div>
+
+    <div class="search-row">
+        <div class="input-icon">
+            <i class="fas fa-id-card"></i>
+            <input type="text" id="enrollInput" placeholder="Enter Enrollment Number (e.g., 24BCT001)" autocomplete="off">
+        </div>
+        <button class="search-btn" id="searchBtn"><i class="fas fa-magnifying-glass"></i> Find Stall</button>
+    </div>
+
+    <div id="resultCard" class="result-card hidden">
+        <div class="stall-header">
+            <span class="stall-id-block"><i class="fas fa-store"></i> Stall ID: <span id="displayStallId">—</span></span>
+            <span class="time-block"><i class="far fa-clock"></i> <span id="displayReporting">—</span></span>
+            <span class="venue-block"><i class="fas fa-location-dot"></i> <span id="displayVenue">—</span></span>
+        </div>
+
+        <div class="project-panel">
+            <div class="project-label"><i class="fas fa-microchip"></i> PROJECT TITLE</div>
+            <div class="project-title" id="displayProjectTitle">—</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-chalkboard-user"></i> INTERNAL GUIDE</div>
+                <div class="info-value" id="displayInternalGuide">—</div>
+            </div>
+            <div class="info-item">
+                <div class="info-label"><i class="fas fa-user-tie"></i> EXTERNAL EXAMINER</div>
+                <div class="info-value" id="displayExternalExaminer">—</div>
+            </div>
+        </div>
+
+        <div class="members-head"><i class="fas fa-users"></i> TEAM MEMBERS</div>
+        <div id="membersContainer"></div>
+        <div class="footnote">📍 Stall ID = Team ID · Find your stall by enrollment number</div>
+    </div>
+    <div class="stats-bar" id="statsBar">
+        <i class="fas fa-database"></i> Loading B.Tech project data...
+    </div>
+</div>
+
+<script>
+document.addEventListener('contextmenu', e => e.preventDefault());
+    (function() {
+        let btechData = [];
+        
+        // DOM elements
+        const enrollInput = document.getElementById('enrollInput');
+        const searchBtn = document.getElementById('searchBtn');
+        const resultCard = document.getElementById('resultCard');
+        const statsBar = document.getElementById('statsBar');
+        
+        // display elements
+        const displayStallId = document.getElementById('displayStallId');
+        const displayReporting = document.getElementById('displayReporting');
+        const displayVenue = document.getElementById('displayVenue');
+        const displayProjectTitle = document.getElementById('displayProjectTitle');
+        const displayInternalGuide = document.getElementById('displayInternalGuide');
+        const displayExternalExaminer = document.getElementById('displayExternalExaminer');
+        const membersContainer = document.getElementById('membersContainer');
+
+        // Helper: show message
+        function showMessage(text, type = 'info') {
+            const existingMsg = document.querySelector('.message');
+            if(existingMsg) existingMsg.remove();
+            
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `message ${type === 'error' ? 'error' : (type === 'info' ? 'info' : '')}`;
+            const icon = type === 'error' ? 'fa-circle-exclamation' : (type === 'info' ? 'fa-circle-check' : 'fa-circle-info');
+            msgDiv.innerHTML = `<i class="fas ${icon}"></i> ${text}`;
+            
+            const searchRow = document.querySelector('.search-row');
+            searchRow.insertAdjacentElement('afterend', msgDiv);
+            
+            setTimeout(() => {
+                if(msgDiv) msgDiv.remove();
+            }, 4000);
+        }
+
+        // Escape HTML
+        function escapeHtml(str) {
+            if (!str) return '—';
+            return String(str).replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        // Display stall/team data
+        function displayStallData(stall) {
+            if(!stall) return;
+            
+            displayStallId.innerText = stall['Stall ID'] || stall['Group ID'] || stall['Team ID'] || '—';
+            displayReporting.innerText = stall['Reporting Time'] || '10:00 AM';
+            displayVenue.innerText = stall['Venue'] || 'Lab 1 / Hall A';
+            displayProjectTitle.innerText = stall['Project_Title'] || stall['Project Title'] || '—';
+            displayInternalGuide.innerText = stall['Internal Guide'] || 'Not Assigned';
+            displayExternalExaminer.innerText = stall['External Examiner'] || 'To be Announced';
+            
+            // Build members list
+            membersContainer.innerHTML = '';
+            if(stall.Members && Array.isArray(stall.Members) && stall.Members.length > 0) {
+                stall.Members.forEach(member => {
+                    const memberDiv = document.createElement('div');
+                    memberDiv.className = 'member-simple';
+                    memberDiv.innerHTML = `
+                        <div class="member-icon-small"><i class="fas fa-user"></i></div>
+                        <div>
+                            <div class="member-name">${escapeHtml(member.Name)}</div>
+                            <span class="member-enroll">${escapeHtml(member.Enrollment)}</span>
+                        </div>
+                    `;
+                    membersContainer.appendChild(memberDiv);
+                });
+            } else {
+                membersContainer.innerHTML = '<div class="member-simple"><div class="member-icon-small"><i class="fas fa-user-slash"></i></div><div>No members data available</div></div>';
+            }
+            
+            resultCard.classList.remove('hidden');
+            showMessage(`✅ Found Stall ID: ${displayStallId.innerText}`, 'info');
+        }
+
+        // Search by enrollment number
+        function searchByEnrollment(enrollment) {
+            const trimmed = enrollment ? enrollment.trim() : '';
+            if(trimmed === '') {
+                showMessage('Please enter an enrollment number', 'error');
+                resultCard.classList.add('hidden');
+                return;
+            }
+            
+            if(!btechData || btechData.length === 0) {
+                showMessage('Data not loaded yet. Please wait or refresh.', 'error');
+                return;
+            }
+            
+            let foundStall = null;
+            for(let stall of btechData) {
+                if(stall.Members && Array.isArray(stall.Members)) {
+                    const isMember = stall.Members.some(m => {
+                        const enroll = m.Enrollment || m.enrollment || '';
+                        return String(enroll).trim() === trimmed;
+                    });
+                    if(isMember) {
+                        foundStall = stall;
+                        break;
+                    }
+                }
+            }
+            
+            if(foundStall) {
+                displayStallData(foundStall);
+            } else {
+                resultCard.classList.add('hidden');
+                showMessage(`❌ No stall found for enrollment: ${trimmed}`, 'error');
+            }
+        }
+
+        // Load btech.json
+        function loadData() {
+            fetch('btech.json')
+                .then(response => {
+                    if(!response.ok) {
+                        throw new Error(`HTTP ${response.status} - ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if(Array.isArray(data) && data.length > 0) {
+                        btechData = data;
+                        const totalStalls = data.length;
+                        let totalStudents = 0;
+                        data.forEach(stall => {
+                            if(stall.Members && Array.isArray(stall.Members)) {
+                                totalStudents += stall.Members.length;
+                            }
+                        });
+                        statsBar.innerHTML = `<i class="fas fa-chart-simple"></i> ${totalStalls} Stalls · ${totalStudents} Students`;
+                        showMessage(`📊 Loaded ${totalStalls} teams/stalls for B.Tech Viva`, 'info');
+                    } else {
+                        throw new Error('Invalid or empty data format');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading btech.json:', error);
+                    statsBar.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Failed to load btech.json. Please ensure the file exists.`;
+                    showMessage('Could not load btech.json. Please check if the file exists in the same directory.', 'error');
+                    btechData = [];
+                });
+        }
+
+        // Event listeners
+        searchBtn.addEventListener('click', () => searchByEnrollment(enrollInput.value));
+        enrollInput.addEventListener('keypress', (e) => {
+            if(e.key === 'Enter') {
+                e.preventDefault();
+                searchByEnrollment(enrollInput.value);
+            }
+        });
+
+        // Initialize
+        loadData();
+        resultCard.classList.add('hidden');
+    })();
+</script>
+</body>
+</html>

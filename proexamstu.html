@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>B.Tech Viva · Stall-wise Display</title>
+    <title>B.Tech Viva · Team ID & Stall ID Display</title>
     <style>
         * {
             margin: 0;
@@ -57,6 +57,17 @@
             color: white;
             display: inline-block;
             margin-top: 0.6rem;
+        }
+        .mapping-note {
+            background: #fff0e0;
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.7rem;
+            color: #a0522d;
+            text-align: center;
+            margin-top: 0.5rem;
+            display: inline-block;
+            width: auto;
         }
 
         /* search row */
@@ -151,7 +162,7 @@
             display: none !important;
         }
 
-        /* stall header - red gradient */
+        /* stall header - red gradient with two ids */
         .stall-header {
             background: linear-gradient(135deg, #8b0000 0%, #cc0000 100%);
             border-radius: 20px;
@@ -169,17 +180,27 @@
             border-radius: 40px;
             padding: 0.4rem 1.2rem;
             font-weight: 700;
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+        }
+        .team-id-block {
+            background: rgba(255,255,255,0.25);
+            border-radius: 40px;
+            padding: 0.4rem 1.2rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
         .time-block {
             background: rgba(255,255,255,0.2);
             border-radius: 40px;
             padding: 0.4rem 1.2rem;
             font-weight: 500;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -189,7 +210,7 @@
             border-radius: 40px;
             padding: 0.4rem 1.2rem;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             display: inline-flex;
             align-items: center;
             gap: 6px;
@@ -219,7 +240,7 @@
             word-break: break-word;
         }
 
-        /* internal guide & external examiner */
+        /* internal guide only - external examiner hidden */
         .info-row {
             display: flex;
             flex-wrap: wrap;
@@ -232,7 +253,7 @@
         }
         .info-item {
             flex: 1;
-            min-width: 180px;
+            min-width: 200px;
         }
         .info-label {
             font-size: 0.7rem;
@@ -243,6 +264,12 @@
         .info-value {
             font-weight: 600;
             color: #8b0000;
+            margin-top: 0.2rem;
+        }
+        .external-hidden-note {
+            font-size: 0.7rem;
+            color: #999;
+            font-style: italic;
             margin-top: 0.2rem;
         }
 
@@ -304,11 +331,8 @@
             padding-top: 0.5rem;
             border-top: 1px solid #ffcccc;
         }
-        hr {
-            display: none;
-        }
         
-        /* stats bar */
+        /* stats bar - clean without mapping details */
         .stats-bar {
             background: #ffe6e6;
             border-radius: 40px;
@@ -325,9 +349,10 @@
 <div class="container">
     <div class="uni-header">
         <h1>🏛️ ITM SLS Baroda University</h1>
-        <h2>Faculty of Technology & Engineering</h2>
-        <div class="dept">School of Computer Science Engineering & Technology</div>
+        <h2>School of Computer Science Engineering & Technology</h2>
+        
         <div class="exam-badge"><i class="far fa-calendar-alt"></i> PROJECT VIVA · STALL-WISE PRESENTATION</div>
+     
     </div>
 
     <div class="search-row">
@@ -341,6 +366,7 @@
     <div id="resultCard" class="result-card hidden">
         <div class="stall-header">
             <span class="stall-id-block"><i class="fas fa-store"></i> Stall ID: <span id="displayStallId">—</span></span>
+            <span class="team-id-block"><i class="fas fa-users-viewfinder"></i> Team ID: <span id="displayTeamId">—</span></span>
             <span class="time-block"><i class="far fa-clock"></i> <span id="displayReporting">—</span></span>
             <span class="venue-block"><i class="fas fa-location-dot"></i> <span id="displayVenue">—</span></span>
         </div>
@@ -350,20 +376,17 @@
             <div class="project-title" id="displayProjectTitle">—</div>
         </div>
 
+        <!-- Only Internal Guide shown, External Examiner hidden as requested -->
         <div class="info-row">
             <div class="info-item">
                 <div class="info-label"><i class="fas fa-chalkboard-user"></i> INTERNAL GUIDE</div>
                 <div class="info-value" id="displayInternalGuide">—</div>
             </div>
-            <div class="info-item" style="display: none;">
-                <div class="info-label"><i class="fas fa-user-tie"></i> EXTERNAL EXAMINER</div>
-                <div class="info-value" id="displayExternalExaminer">—</div>
-            </div>
         </div>
 
         <div class="members-head"><i class="fas fa-users"></i> TEAM MEMBERS</div>
         <div id="membersContainer"></div>
-        <div class="footnote">📍 Stall ID = Team ID · Find your stall by enrollment number</div>
+       
     </div>
     <div class="stats-bar" id="statsBar">
         <i class="fas fa-database"></i> Loading B.Tech project data...
@@ -372,8 +395,74 @@
 
 <script>
 document.addEventListener('contextmenu', e => e.preventDefault());
-    (function() {
-        let btechData = [];
+
+// MAPPING RULES:
+// Team ID = 1 -> Stall ID = 36
+// Team ID = 2 -> Stall ID = 37
+// Team ID >= 3 -> Stall ID mapping with SKIP of 53
+// For Team ID 3 to 17: 48,49,50,51,52,54,55,56,57,58,59,60,61,62,63...
+// Stall ID 53 is intentionally skipped
+function computeStallIdFromTeamId(teamId) {
+    const tid = Number(teamId);
+    if (isNaN(tid)) return teamId;
+    
+    if (tid === 1) return 36;
+    if (tid === 2) return 37;
+    if (tid >= 3) {
+        // Base: Team ID 3 -> Stall 48
+        // Then for each subsequent team ID, increment stall ID but skip 53
+        let stallId = 48 + (tid - 3);
+        // If stall ID is 53 or greater, add 1 to skip 53
+        if (stallId >= 53) {
+            stallId = stallId + 1;
+        }
+        return stallId;
+    }
+    return tid;
+}
+
+// Extract Team ID from stall object (priority: "Team ID", then "Group ID", then fallback)
+function getTeamIdFromStall(stall) {
+    if (stall['Team ID'] !== undefined && stall['Team ID'] !== null) return stall['Team ID'];
+    if (stall['Group ID'] !== undefined && stall['Group ID'] !== null) return stall['Group ID'];
+    if (stall['teamId'] !== undefined && stall['teamId'] !== null) return stall['teamId'];
+    if (stall['Team_ID'] !== undefined) return stall['Team_ID'];
+    // fallback: look for numeric Stall ID that might represent team id
+    if (stall['Stall ID'] !== undefined && !isNaN(Number(stall['Stall ID']))) return stall['Stall ID'];
+    return null;
+}
+
+// Enhance data: compute mapped stall ID and preserve team ID
+function applyStallMappingToData(teamsArray) {
+    return teamsArray.map((team, idx) => {
+        const originalTeamId = getTeamIdFromStall(team);
+        let mappedStallId = null;
+        let effectiveTeamId = originalTeamId;
+        
+        // If no explicit Team ID found but we have index+1 as fallback (for demo data robustness)
+        if (effectiveTeamId === null || effectiveTeamId === undefined) {
+            // try to infer from any existing field
+            if (team['Stall ID'] && !isNaN(Number(team['Stall ID']))) {
+                effectiveTeamId = Number(team['Stall ID']);
+            } else {
+                // fallback to index+1 (so that mapping still works)
+                effectiveTeamId = idx + 1;
+            }
+        }
+        
+        mappedStallId = computeStallIdFromTeamId(effectiveTeamId);
+        
+        return {
+            ...team,
+            originalStallId: team['Stall ID'] || null,
+            computedDisplayStallId: mappedStallId,
+            effectiveTeamId: effectiveTeamId
+        };
+    });
+}
+
+(function() {
+        let enhancedData = [];       // data with computed stall ids & team ids
         
         // DOM elements
         const enrollInput = document.getElementById('enrollInput');
@@ -383,11 +472,11 @@ document.addEventListener('contextmenu', e => e.preventDefault());
         
         // display elements
         const displayStallId = document.getElementById('displayStallId');
+        const displayTeamId = document.getElementById('displayTeamId');
         const displayReporting = document.getElementById('displayReporting');
         const displayVenue = document.getElementById('displayVenue');
         const displayProjectTitle = document.getElementById('displayProjectTitle');
         const displayInternalGuide = document.getElementById('displayInternalGuide');
-        const displayExternalExaminer = document.getElementById('displayExternalExaminer');
         const membersContainer = document.getElementById('membersContainer');
 
         // Helper: show message
@@ -419,21 +508,32 @@ document.addEventListener('contextmenu', e => e.preventDefault());
             });
         }
 
-        // Display stall/team data
-        function displayStallData(stall) {
-            if(!stall) return;
+        // Display stall data - shows Team ID and Stall ID, hides external examiner
+        function displayStallData(enhancedStall) {
+            if(!enhancedStall) return;
             
-            displayStallId.innerText = stall['Stall ID'] || stall['Group ID'] || stall['Team ID'] || '—';
-            displayReporting.innerText = stall['Reporting Time'] || '10:00 AM';
-            displayVenue.innerText = stall['Venue'] || 'Lab 1 / Hall A';
-            displayProjectTitle.innerText = stall['Project_Title'] || stall['Project Title'] || '—';
-            displayInternalGuide.innerText = stall['Internal Guide'] || 'Not Assigned';
-            displayExternalExaminer.innerText = stall['External Examiner'] || 'To be Announced';
+            // Display computed Stall ID (mapped)
+            const stallIdToShow = enhancedStall.computedDisplayStallId || '—';
+            displayStallId.innerText = stallIdToShow;
+            
+            // Display Team ID clearly
+            const teamIdValue = (enhancedStall.effectiveTeamId !== null && enhancedStall.effectiveTeamId !== undefined) 
+                ? enhancedStall.effectiveTeamId 
+                : '—';
+            displayTeamId.innerText = teamIdValue;
+            
+            // Reporting time & venue
+            displayReporting.innerText = enhancedStall['Reporting Time'] || '10:00 AM';
+            displayVenue.innerText = enhancedStall['Venue'] || 'Lab 1 / Hall A';
+            displayProjectTitle.innerText = enhancedStall['Project_Title'] || enhancedStall['Project Title'] || '—';
+            
+            // Internal Guide only (External Examiner not displayed anywhere)
+            displayInternalGuide.innerText = enhancedStall['Internal Guide'] || 'Not Assigned';
             
             // Build members list
             membersContainer.innerHTML = '';
-            if(stall.Members && Array.isArray(stall.Members) && stall.Members.length > 0) {
-                stall.Members.forEach(member => {
+            if(enhancedStall.Members && Array.isArray(enhancedStall.Members) && enhancedStall.Members.length > 0) {
+                enhancedStall.Members.forEach(member => {
                     const memberDiv = document.createElement('div');
                     memberDiv.className = 'member-simple';
                     memberDiv.innerHTML = `
@@ -450,7 +550,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
             }
             
             resultCard.classList.remove('hidden');
-            showMessage(`✅ Found Stall ID: ${displayStallId.innerText}`, 'info');
+            showMessage(`✅ Team ID ${teamIdValue} → Stall ID ${stallIdToShow}`, 'info');
         }
 
         // Search by enrollment number
@@ -462,13 +562,13 @@ document.addEventListener('contextmenu', e => e.preventDefault());
                 return;
             }
             
-            if(!btechData || btechData.length === 0) {
+            if(!enhancedData || enhancedData.length === 0) {
                 showMessage('Data not loaded yet. Please wait or refresh.', 'error');
                 return;
             }
             
             let foundStall = null;
-            for(let stall of btechData) {
+            for(let stall of enhancedData) {
                 if(stall.Members && Array.isArray(stall.Members)) {
                     const isMember = stall.Members.some(m => {
                         const enroll = m.Enrollment || m.enrollment || '';
@@ -489,7 +589,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
             }
         }
 
-        // Load btech.json
+        // Load btech.json and apply mapping, then update stats bar without mapping details
         function loadData() {
             fetch('btech.json')
                 .then(response => {
@@ -500,16 +600,22 @@ document.addEventListener('contextmenu', e => e.preventDefault());
                 })
                 .then(data => {
                     if(Array.isArray(data) && data.length > 0) {
-                        btechData = data;
-                        const totalStalls = data.length;
+                        // Apply stall mapping logic to compute Stall IDs from Team IDs
+                        enhancedData = applyStallMappingToData(data);
+                        
+                        const totalStalls = enhancedData.length;
                         let totalStudents = 0;
-                        data.forEach(stall => {
+                        enhancedData.forEach(stall => {
                             if(stall.Members && Array.isArray(stall.Members)) {
                                 totalStudents += stall.Members.length;
                             }
                         });
+                        
+                        // Simple stats bar: just show stalls and students count (no mapping details as requested)
                         statsBar.innerHTML = `<i class="fas fa-chart-simple"></i> ${totalStalls} Stalls · ${totalStudents} Students`;
-                        showMessage(`📊 Loaded ${totalStalls} teams/stalls for B.Tech Viva`, 'info');
+                        
+                        // Optional: verify that mapping is correct for first few teams but do not display in stats bar
+                        showMessage(`📊 Loaded ${totalStalls} teams. Use enrollment number to find Stall & Team ID. (Stall ID 53 skipped)`, 'info');
                     } else {
                         throw new Error('Invalid or empty data format');
                     }
@@ -518,7 +624,7 @@ document.addEventListener('contextmenu', e => e.preventDefault());
                     console.error('Error loading btech.json:', error);
                     statsBar.innerHTML = `<i class="fas fa-triangle-exclamation"></i> Failed to load btech.json. Please ensure the file exists.`;
                     showMessage('Could not load btech.json. Please check if the file exists in the same directory.', 'error');
-                    btechData = [];
+                    enhancedData = [];
                 });
         }
 

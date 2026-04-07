@@ -352,7 +352,7 @@
         <h2>School of Computer Science Engineering & Technology</h2>
         
         <div class="exam-badge"><i class="far fa-calendar-alt"></i> PROJECT VIVA · STALL-WISE PRESENTATION</div>
-     
+        <div class="mapping-note"><i class="fas fa-arrow-right"></i> Team ID 1→Stall 36, Team ID 2→Stall 37, Team ID 3→Stall 48, Team ID 4→Stall 49 ... (Stall ID 53 & 67 skipped)</div>
     </div>
 
     <div class="search-row">
@@ -386,7 +386,7 @@
 
         <div class="members-head"><i class="fas fa-users"></i> TEAM MEMBERS</div>
         <div id="membersContainer"></div>
-       
+        <div class="footnote">📍 Stall ID mapped from Team ID · Stall IDs 53 and 67 skipped · External Examiner details not displayed</div>
     </div>
     <div class="stats-bar" id="statsBar">
         <i class="fas fa-database"></i> Loading B.Tech project data...
@@ -399,9 +399,9 @@ document.addEventListener('contextmenu', e => e.preventDefault());
 // MAPPING RULES:
 // Team ID = 1 -> Stall ID = 36
 // Team ID = 2 -> Stall ID = 37
-// Team ID >= 3 -> Stall ID mapping with SKIP of 53
-// For Team ID 3 to 17: 48,49,50,51,52,54,55,56,57,58,59,60,61,62,63...
-// Stall ID 53 is intentionally skipped
+// Team ID >= 3 -> Stall ID mapping with SKIP of 53 and 67
+// For Team ID 3 to 17: 48,49,50,51,52,54,55,56,57,58,59,60,61,62,63,64,65,66,68,69...
+// Stall ID 53 and 67 are intentionally skipped
 function computeStallIdFromTeamId(teamId) {
     const tid = Number(teamId);
     if (isNaN(tid)) return teamId;
@@ -410,12 +410,18 @@ function computeStallIdFromTeamId(teamId) {
     if (tid === 2) return 37;
     if (tid >= 3) {
         // Base: Team ID 3 -> Stall 48
-        // Then for each subsequent team ID, increment stall ID but skip 53
         let stallId = 48 + (tid - 3);
-        // If stall ID is 53 or greater, add 1 to skip 53
+        
+        // Skip Stall ID 53 (if stallId reaches 53, add 1 to skip it)
         if (stallId >= 53) {
             stallId = stallId + 1;
         }
+        
+        // Skip Stall ID 67 (after first skip, if stallId reaches 67, add another 1)
+        if (stallId >= 67) {
+            stallId = stallId + 1;
+        }
+        
         return stallId;
     }
     return tid;
@@ -615,7 +621,7 @@ function applyStallMappingToData(teamsArray) {
                         statsBar.innerHTML = `<i class="fas fa-chart-simple"></i> ${totalStalls} Stalls · ${totalStudents} Students`;
                         
                         // Optional: verify that mapping is correct for first few teams but do not display in stats bar
-                        showMessage(`📊 Loaded ${totalStalls} teams. Use enrollment number to find Stall & Team ID. (Stall ID 53 skipped)`, 'info');
+                        showMessage(`📊 Loaded ${totalStalls} teams. Use enrollment number to find Stall & Team ID. (Stall IDs 53 & 67 skipped)`, 'info');
                     } else {
                         throw new Error('Invalid or empty data format');
                     }
